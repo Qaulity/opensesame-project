@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damien's Journey - OpenSesame Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .intro {
+            text-align: center;
+            padding: 60px 20px;
+            margin-bottom: 60px;
+        }
+
+        .intro h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .intro p {
+            font-size: 1.3rem;
+            color: #94a3b8;
+            max-width: 700px;
+            margin: 0 auto;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 50%;
+            position: relative;
+            margin-bottom: 80px;
+            opacity: 0;
+            animation: slideInLeft 0.6s ease-out forwards;
+        }
+
+        .timeline-item:nth-child(even) {
+            justify-content: flex-start;
+            padding-right: 0;
+            padding-left: 50%;
+            animation: slideInRight 0.6s ease-out forwards;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.5s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.7s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.9s; }
+        .timeline-item:nth-child(5) { animation-delay: 1.1s; }
+
+        .timeline-content {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            width: calc(100% - 60px);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            transform: translateY(-5px);
+            border-color: rgba(96, 165, 250, 0.5);
+            box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            border: 4px solid #0f172a;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: 50%;
+        }
+
+        .timeline-content h2 {
+            color: #60a5fa;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline-content .date {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .timeline-content p {
+            color: #cbd5e1;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+
+        .tag {
+            display: inline-block;
+            background: rgba(96, 165, 250, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.4);
+            color: #93c5fd;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-top: 10px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(167, 139, 250, 0.15) 100%);
+            border-left: 4px solid #60a5fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .highlight h3 {
+            color: #a78bfa;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .question-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .ai-demo {
+            background: rgba(30, 41, 59, 0.6);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .ai-demo h4 {
+            color: #a78bfa;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .code-snippet {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            overflow-x: auto;
+        }
+
+        .interactive-element {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+            border: 2px dashed rgba(96, 165, 250, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .interactive-element:hover {
+            border-color: rgba(96, 165, 250, 0.6);
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .conclusion {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .conclusion h2 {
+            color: #60a5fa;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .conclusion p {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 20px;
+        }
+
+        @media (max-width: 768px) {
+            .intro h1 {
+                font-size: 2.5rem;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                justify-content: flex-start;
+                padding-left: 60px;
+                padding-right: 20px;
+            }
+
+            .timeline-dot {
+                left: 20px;
+            }
+
+            .timeline-content {
+                width: 100%;
+            }
+        }
+
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .skill-item {
+            background: rgba(100, 116, 139, 0.2);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="intro">
+            <h1>Building Intelligence Through Experience</h1>
+            <p>A journey from hands-on robotics to AI-powered learning platforms — exploring how technology can democratize education and empower learners everywhere.</p>
+        </div>
+
+        <div class="timeline">
+            <!-- Timeline Item 1: FIRST Robotics -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2><span class="icon">🤖</span> FIRST Robotics Competition</h2>
+                    <div class="date">The Foundation: Learning by Building</div>
+                    <p>My journey with technology started with FIRST Robotics — designing, programming, and iterating on complex systems with real constraints. This experience taught me something crucial: <strong>the best learning happens when you're building something that matters.</strong></p>
+                    
+                    <div class="highlight">
+                        <h3>The Core Philosophy</h3>
+                        <p>Every competition was a cycle of: design → build → test → learn → improve. No textbook could replace the insight gained from seeing your code control a physical robot, watching it fail, and understanding <em>why</em> it failed.</p>
+                    </div>
+                    
+                    <span class="tag">Hands-on Learning</span>
+                    <span class="tag">Team Collaboration</span>
+                    <span class="tag">Iterative Design</span>
+                </div>
+            </div>
+
+            <!-- Timeline Item 2: Virginia Tech & Systems Programming -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2><span class="icon">⚙️</span> Systems Programming at Virginia Tech</h2>
+                    <div class="date">CS3214: Understanding How Things Work</div>
+                    <p>Implementing work-stealing thread pools in C with fine-grained locking taught me more than concurrency — it taught me that <strong>understanding the fundamentals enables you to build anything.</strong></p>
+                    
+                    <div class="ai-demo">
+                        <h4>💡 The Learning Moment</h4>
+                        <p>When my Fork-Join Framework finally achieved optimal work distribution across threads, it clicked: complex systems emerge from simple, well-understood primitives. This principle applies to AI/ML systems too — understanding transformers, attention mechanisms, and gradient descent at a fundamental level unlocks the ability to build sophisticated learning systems.</p>
+                    </div>
+
+                    <div class="highlight">
+                        <h3>Why This Matters for AI <span class="question-badge">Question 3</span></h3>
+                        <p>AI excites me because it's the ultimate "learning companion" — it can adapt to individual learning styles, provide immediate feedback, and make complex topics accessible. Just like how understanding pointers and memory management unlocks systems programming, AI can help learners find the right mental models for any subject.</p>
+                    </div>
+                    
+                    <span class="tag">C Programming</span>
+                    <span class="tag">Concurrency</span>
+                    <span class="tag">Performance Optimization</span>
+                </div>
+            </div>
+
+            <!-- Timeline Item 3: HokieExchange -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2><span class="icon">🎓</span> HokieExchange: Building for Real Users</h2>
+                    <div class="date">Capstone Project: Full-Stack Marketplace Platform</div>
+                    <p>Leading development of a student marketplace taught me that great technology serves real human needs. Using Python FastAPI, PostgreSQL, and Firebase authentication, we're creating a platform that students actually want to use.</p>
+                    
+                    <div class="highlight">
+                        <h3>Learning Through Shipping <span class="question-badge">Question 2</span></h3>
+                        <p><strong>My strength is translating ideas into working systems.</strong> From database schema design to API development to frontend implementation, I've learned that the best way to understand a problem is to build the solution. This hands-on, iterative approach is exactly what excites me about AI in education — building systems that learn and adapt based on real user interactions.</p>
+                    </div>
+
+                    <div class="skill-grid">
+                        <div class="skill-item">Python FastAPI</div>
+                        <div class="skill-item">PostgreSQL</div>
+                        <div class="skill-item">React + TypeScript</div>
+                        <div class="skill-item">Firebase Auth</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Item 4: DSA Club & Interview Prep -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2><span class="icon">📚</span> Data Structures & Algorithms Club</h2>
+                    <div class="date">Active Involvement: Teaching Through Problem-Solving</div>
+                    <p>Being part of Virginia Tech's DSA club reinforced something important: <strong>teaching is one of the best ways to learn.</strong> Explaining algorithms to peers, working through LeetCode problems collaboratively, and seeing different approaches to the same problem deepened my own understanding.</p>
+                    
+                    <div class="ai-demo">
+                        <h4>🚀 The Vision: AI as a Learning Companion</h4>
+                        <p>Imagine an AI tutor that doesn't just give you the answer, but guides you through the problem-solving process. It could:</p>
+                        <ul style="text-align: left; margin-left: 20px; margin-top: 10px;">
+                            <li>Identify knowledge gaps and adapt explanations</li>
+                            <li>Provide hints at the right level of difficulty</li>
+                            <li>Generate practice problems tailored to your learning style</li>
+                            <li>Make complex algorithms accessible through interactive visualizations</li>
+                        </ul>
+                        <p style="margin-top: 15px;"><em>This is what excites me about AI in learning — democratizing access to personalized education.</em></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Item 5: Future with OpenSesame -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2><span class="icon">🎯</span> The Next Chapter: OpenSesame</h2>
+                    <div class="date">Where My Journey Leads <span class="question-badge">Question 1</span></div>
+                    <p>OpenSesame represents the convergence of everything I'm passionate about: <strong>AI/ML development, learning systems, and building technology that empowers people.</strong></p>
+                    
+                    <div class="highlight">
+                        <h3>How OpenSesame Fits My Career Journey</h3>
+                        <p>I see OpenSesame as the perfect place to grow as an AI/ML engineer while working on problems that matter. My career goal is to build intelligent learning systems that adapt to individual needs — making education more accessible and effective. OpenSesame's mission of transforming workplace learning aligns perfectly with this vision.</p>
+                        <p style="margin-top: 15px;">From building thread pools to full-stack applications, I've developed the technical foundation. Now I want to apply that foundation to AI/ML systems that help people learn, grow, and succeed in their careers.</p>
+                    </div>
+
+                    <div class="interactive-element" onclick="showImpact()">
+                        <h3 style="color: #60a5fa; margin-bottom: 10px;">💫 Click to See My Impact Areas</h3>
+                        <p style="color: #94a3b8; margin: 0;" id="impact-text">What I bring to OpenSesame →</p>
+                    </div>
+
+                    <div id="impact-content" style="display: none; margin-top: 20px;">
+                        <div class="highlight">
+                            <h3>What I Bring to OpenSesame <span class="question-badge">Question 2</span></h3>
+                            <p><strong>1. Full-Stack Development Skills:</strong> From systems-level C to modern web frameworks, I can contribute across the entire stack.</p>
+                            <p style="margin-top: 10px;"><strong>2. Learning-Through-Doing Philosophy:</strong> I understand how people learn best because I've lived it — from robotics to systems programming to building real products.</p>
+                            <p style="margin-top: 10px;"><strong>3. AI/ML Passion & Growth Mindset:</strong> I'm eager to dive deep into machine learning, natural language processing, and recommendation systems that power intelligent learning platforms.</p>
+                            <p style="margin-top: 10px;"><strong>4. User-Centric Thinking:</strong> Building HokieExchange taught me to always ask: "Does this actually solve the user's problem?"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="conclusion">
+            <h2>Building the Future of Learning</h2>
+            <p>My journey from FIRST Robotics to Virginia Tech to OpenSesame is driven by one core belief: <strong>technology should empower everyone to learn, grow, and achieve their potential.</strong></p>
+            <p style="margin-top: 20px;">AI isn't just about algorithms and models — it's about creating learning companions that understand you, adapt to you, and help you overcome barriers. That's the future I want to build, and OpenSesame is where I want to build it.</p>
+            <p style="margin-top: 30px; color: #60a5fa; font-size: 1.2rem;">Let's make learning accessible, engaging, and transformative together. 🚀</p>
+        </div>
+    </div>
+
+    <script>
+        function showImpact() {
+            const impactContent = document.getElementById('impact-content');
+            const impactText = document.getElementById('impact-text');
+            
+            if (impactContent.style.display === 'none') {
+                impactContent.style.display = 'block';
+                impactText.textContent = 'Hide Impact Areas ↑';
+            } else {
+                impactContent.style.display = 'none';
+                impactText.textContent = 'What I bring to OpenSesame →';
+            }
+        }
+
+        // Add smooth scroll effect
+        document.querySelectorAll('.timeline-content').forEach(item => {
+            item.addEventListener('click', function() {
+                this.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>
